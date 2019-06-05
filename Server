@@ -1,0 +1,60 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
+
+void error(char *msg);
+
+int main(int argc, char *argv[])
+{
+	int mySocket, length, fromlen, n;
+	struct sockaddr_in server;
+	struct sockaddr_in from;
+	char buffer[1024];
+
+	if (argc < 2)
+		error("Numero da porta não foi fornecido.");
+
+	mySocket = socket(AF_INET, SOCK_DGRAM, 0);
+
+	if(mySocket < 0)
+		error("Falha ao inicializar o socket.");
+
+	length = sizeof(server);
+	bzero(&server,length);
+	server.sin_family = AF_INET;
+	server.sin_addr.s_addr = INADDR_ANY;
+	server.sin_port = htons(atoi(argv[1]));
+
+	if (bind(mySocket,(struct sockaddr *) &server, length) < 0)
+			error("Falha no bind.");
+
+	fromlen = sizeof(struct sockaddr_in);
+
+	while(1)
+	{
+		n = recvfrom(mySocket, buffer, 1024,0,(struct sockaddr *) &from, &fromlen);
+		
+		if (n < 0)
+			error("Erro ao receber.");
+
+		write(1, "Pacote recebido: ", 17);
+		write(1,buff,n);
+
+		n = sendto(sock, "Mensagem recebida\n",18,0,(struct sockaddr *)&from, fromlen);
+
+		if (n < 0)
+			error("Erro ao enviar.");
+	}
+
+
+	return 0;
+}
+
+void error(char *msg)
+{
+	perror(msg);
+	exit(0);
+}   
